@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Todolist</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa; /* Fallback color */
+            background-image: linear-gradient(to top, #e9ecef 0%, #f8f9fa 100%);
+            color: #212529;
+            margin: 0;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        /* Form Styles */
+        #task-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        input[type="text"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 40px; /* Added margin */
+        }
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        #add-task-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        #add-task-btn:hover {
+            background-color: #0069d9;
+            transform: translateY(-2px);
+        }
+        #print-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #print-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Table Styles */
+        #task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed; /* Use fixed layout */
+            word-wrap: break-word; /* Break long words */
+        }
+        td {
+            padding: 20px 15px; /* Increased vertical padding */
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #dee2e6; /* Horizontal borders */
+        }
+        th {
+            padding: 20px 15px;
+            text-align: center; /* Centered as requested */
+            vertical-align: top;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+            color: #343a40; /* Darker color for more contrast */
+            font-weight: bold; /* Bolder as requested */
+            border-top: 1px solid #dee2e6;
+        }
+        /* Column Widths */
+        #task-table th:nth-child(1) { width: 28%; } /* 任务 */
+        #task-table th:nth-child(2) { width: 16%; } /* 开始时间 */
+        #task-table th:nth-child(3) { width: 12%; } /* 完成度 */
+        #task-table th:nth-child(4) { width: 22%; } /* 思考 */
+        #task-table th:nth-child(5) { width: 22%; } /* 缺陷 */
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-image: none;
+                background-color: #fff;
+                padding: 0;
+                font-size: 11pt;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                padding: 10px;
+                max-width: 100%;
+            }
+            #task-form, .form-actions {
+                display: none !important;
+            }
+            table, th, td {
+                border: 1px solid #000;
+            }
+            #task-table td {
+                height: 80px; /* Set fixed height for writing */
+                vertical-align: top;
+            }
+            th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+             tbody tr:nth-child(even) {
+                background-color: #fff !important;
+                 -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Todolist</h2>
+
+    <form id="task-form">
+        <div class="form-group">
+            <label for="task-input">任务</label>
+            <input type="text" id="task-input" required>
+        </div>
+        <div class="form-group">
+            <label for="time-input">时间</label>
+            <input type="text" id="time-input" placeholder="例如: 2025-08-26 10:00">
+        </div>
+        <div class="form-group full-width">
+            <label for="completion-input">完成度</label>
+            <input type="text" id="completion-input" placeholder="例如: 80% 或 进行中">
+        </div>
+        <div class="form-group full-width">
+            <label for="thoughts-input">思考</label>
+            <textarea id="thoughts-input" rows="3"></textarea>
+        </div>
+        <div class="form-group full-width">
+            <label for="defects-input">缺陷</label>
+            <textarea id="defects-input" rows="3"></textarea>
+        </div>
+    </form>
+    
+    <div class="form-actions">
+        <button type="submit" id="add-task-btn" form="task-form">添加任务</button>
+        <button id="print-btn">打印 / 保存为 PDF</button>
+    </div>
+
+    <table id="task-table">
+        <thead>
+            <tr>
+                <th>任务</th>
+                <th>时间</th>
+                <th>完成度</th>
+                <th>思考</th>
+                <th>缺陷</th>
+            </tr>
+        </thead>
+        <tbody id="task-list">
+            <!-- Tasks will be added here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const taskForm = document.getElementById('task-form');
+        const taskList = document.getElementById('task-list');
+        const printBtn = document.getElementById('print-btn');
+        const timeInput = document.getElementById('time-input');
+
+        // Function to get and format the current date and time
+        function setCurrentTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeInput.value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Set the time when the page loads
+        setCurrentTime();
+
+        // Handle form submission to add a new task
+        taskForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent page reload
+
+            // Get values from the form
+            const task = document.getElementById('task-input').value.trim();
+            const time = timeInput.value.trim(); // Use the reference
+            const completion = document.getElementById('completion-input').value.trim();
+            const thoughts = document.getElementById('thoughts-input').value.trim();
+            const defects = document.getElementById('defects-input').value.trim();
+
+            if (task === '') {
+                alert('“任务”字段不能为空！');
+                return;
+            }
+
+            // Create a new table row
+            const row = document.createElement('tr');
+
+            // Insert cells with the form data
+            row.innerHTML = `
+                <td>${escapeHTML(task)}</td>
+                <td>${escapeHTML(time)}</td>
+                <td>${escapeHTML(completion)}</td>
+                <td>${escapeHTML(thoughts)}</td>
+                <td>${escapeHTML(defects)}</td>
+            `;
+
+            // Append the new row to the table body
+            taskList.appendChild(row);
+
+            // Clear the form fields for the next entry
+            taskForm.reset();
+            
+            // Set the time for the next task
+            setCurrentTime();
+        });
+
+        // Handle print button click
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        // Simple HTML escaping function to prevent XSS
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+    });
+</script>
+
+</body>
+</html>
